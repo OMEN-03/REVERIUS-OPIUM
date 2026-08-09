@@ -1,0 +1,7 @@
+COMMAND: ['py', '-3', '-m', 'pre_commit', 'run', '--all-files', '--verbose']
+RETURN_CODE: 1
+STDOUT:
+An error has occurred: FatalError: git failed. Is it installed, and are you in a Git repository directory?
+Check the log at C:\Users\legen\.cache\pre-commit\pre-commit.log
+
+STDERR:

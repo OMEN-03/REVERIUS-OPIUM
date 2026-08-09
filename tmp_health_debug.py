@@ -1,0 +1,15 @@
+from pathlib import Path
+from utils import project_health
+root = Path('.').resolve()
+print('root', root)
+print('docs', project_health._find_documentation(root))
+print('plugins', project_health._discover_plugins(root))
+print('todos', len(project_health._find_todo_findings(root)))
+print('imports', len(project_health._validate_imports(root)))
+report = project_health.build_health_report(root)
+print('score', report['score'])
+print('status', report['status'])
+print('checks passed', sum(1 for item in report['checks'] if item['passed']), len(report['checks']))
+print('metrics', report['metrics'])
+print('findings count', len(report['findings']))
+print(report['findings'][:5])

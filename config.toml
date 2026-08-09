@@ -1,0 +1,27 @@
+[ai]
+# Set your OpenAI API key here or via environment variables.
+# Preferred env vars: OPENAI_API_KEY, REVERIUS_OPENAI_API_KEY, OMEN_OPENAI_API_KEY
+# You can also use config values directly for config.toml-based deployments.
+preferred_backend = "offline"
+api_key = ""
+reverius_api_key = ""
+omen_api_key = ""
+timeout_seconds = 10
+temperature = 0.2
+max_tokens = 512
+streaming = true
+
+[logging]
+level = "INFO"
+
+[voice]
+enabled = false
+
+[vision]
+enabled = false
+
+[memory]
+backend = "sqlite"
+
+[plugins]
+enabled = true

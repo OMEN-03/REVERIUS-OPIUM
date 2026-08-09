@@ -1,0 +1,3 @@
+path,name,start_ns,end_ns,duration_s,annotations,tags,meta
+plan,plan,1786094739552853700,1786094739552853700,0.0,thinking about objectives,iteration-1,"{""priority"": ""high""}"
+plan/draft prompt,draft prompt,1786094739552853700,1786094739552853700,0.0,first draft,,

@@ -1,0 +1,94 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reverius-opium"
+version = "0.1.0"
+description = "Enterprise-grade AI assistant and asset management platform for REVERIUS OPIUM."
+readme = "README.md"
+authors = [
+  { name = "REVERIUS OPIUM Team", email = "team@reveriusopium.local" }
+]
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+keywords = ["AI", "assistant", "asset-management", "plugin", "voice", "automation"]
+classifiers = [
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Environment :: Console",
+  "Environment :: Win32 (MS Windows)",
+  "Environment :: X11 Applications :: Qt",
+  "Topic :: Software Development :: Libraries :: Application Frameworks"
+]
+
+[project.urls]
+Homepage = "https://example.com/reverius-opium"
+Repository = "https://github.com/reverius-opium/repo"
+Documentation = "https://example.com/reverius-opium/docs"
+
+[project.dependencies]
+python-dotenv = "^1.0"
+requests = "^2.31"
+psutil = "^5.9"
+PyYAML = "^6.0"
+rich = "^13.0"
+
+[project.optional-dependencies]
+ai = [
+  "openai>=1.0",
+  "openjarvis>=0.1"
+]
+ui = [
+  "customtkinter>=5.0",
+  "matplotlib>=3.8",
+  "Pillow>=10.0"
+]
+voice = [
+  "pyttsx3>=2.9"
+]
+test = [
+  "pytest>=8.4",
+  "pytest-cov>=4.1",
+  "ruff>=0.0",
+  "black>=24.3",
+  "mypy>=1.9",
+  "isort>=5.12",
+  "pre-commit>=4.5"
+]
+dev = [
+  "pytest>=8.4",
+  "pytest-cov>=4.1",
+  "ruff>=0.0",
+  "black>=24.3",
+  "mypy>=1.9",
+  "isort>=5.12",
+  "pre-commit>=4.5",
+  "tox>=4.8"
+]
+
+[project.scripts]
+reverius = "main:main"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+ignore = ["E501"]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--strict-markers --cov=./ --cov-report=term-missing"
+python_files = ["tests/test_*.py"]
