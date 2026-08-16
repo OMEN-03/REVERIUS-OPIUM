@@ -10,13 +10,13 @@ readme = "README.md"
 authors = [
   { name = "REVERIUS OPIUM Team", email = "team@reveriusopium.local" }
 ]
-license = { file = "LICENSE" }
+license = { text = "Proprietary" }
 requires-python = ">=3.11"
 keywords = ["AI", "assistant", "asset-management", "plugin", "voice", "automation"]
 classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3 :: Only",
-  "License :: OSI Approved :: MIT License",
+  "License :: Other/Proprietary License",
   "Operating System :: OS Independent",
   "Environment :: Console",
   "Environment :: Win32 (MS Windows)",

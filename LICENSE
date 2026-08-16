@@ -1,21 +1,138 @@
-MIT License
+REVERIUS OPIUM
+Proprietary Software License & Terms of Use
 
 Copyright (c) 2026 REVERIUS OPIUM.
+All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+================================================================================
+PROPRIETARY SOFTWARE NOTICE
+================================================================================
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software, including all source code, documentation, materials, and works
+of authorship, is the exclusive proprietary property of REVERIUS OPIUM.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This software is NOT open source and NO PUBLIC LICENSE is granted.
+
+No person or entity may:
+  • Use this software without explicit written authorization
+  • Copy this software in whole or in part
+  • Modify, adapt, translate, reverse engineer, or create derivative works
+  • Distribute, sublicense, sell, lease, or transfer this software
+  • Use this software to create competing products or services
+  • Plagiarize, misrepresent ownership, or claim authorship
+
+Unauthorized access, use, copying, modification, distribution, or plagiarism
+is strictly prohibited and constitutes:
+  • Breach of contract
+  • Copyright infringement
+  • Theft of trade secrets
+  • Potentially criminal computer fraud
+
+================================================================================
+ACCESS & CONFIDENTIALITY
+================================================================================
+
+This software is provided in strict confidence to explicitly authorized
+individuals only. Access does not grant ownership or usage rights.
+
+Authorized users must:
+  • Maintain confidentiality of this software and its contents
+  • Protect this software from unauthorized access or disclosure
+  • Use this software only for authorized purposes
+  • Not remove or alter copyright notices, proprietary marks, or disclaimers
+
+This software contains trade secrets and confidential information protected by
+law. Unauthorized disclosure or misappropriation is punishable by civil and
+criminal penalties.
+
+================================================================================
+TERMS OF USE
+================================================================================
+
+By accessing or using this software, you acknowledge:
+
+1. OWNERSHIP: REVERIUS OPIUM is the sole owner of all intellectual property
+   rights in this software, including copyright, trade secrets, and patents.
+
+2. LIMITED LICENSE: If authorized, you are granted a non-exclusive,
+   non-transferable, revocable license to use this software solely for
+   authorized purposes and only during the period of authorization.
+
+3. RESTRICTIONS: You may not:
+   - Copy, clone, fork, or reproduce this software
+   - Distribute, upload, or share this software with unauthorized parties
+   - Modify, reverse engineer, decompile, or attempt to derive source code
+   - Create derivative works or competitive products
+   - Use this software for commercial purposes without authorization
+   - Remove or alter copyright, proprietary, or confidentiality notices
+   - Sublicense or transfer access to others
+
+4. PLAGIARISM PROHIBITION: You may not:
+   - Claim authorship or ownership of this software
+   - Present this software as your own work
+   - Misrepresent the origin or authorship of code or concepts
+   - Incorporate this software into other projects without authorization
+
+5. CONFIDENTIALITY: This software and all information about it are confidential
+   and proprietary. You must protect this information from unauthorized access
+   or disclosure.
+
+6. NO WARRANTY: THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS
+   FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT.
+
+7. LIMITATION OF LIABILITY: IN NO EVENT SHALL REVERIUS OPIUM BE LIABLE FOR ANY
+   INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES.
+
+8. TERMINATION: Your access and authorization to use this software may be
+   terminated immediately upon breach or at REVERIUS OPIUM's sole discretion.
+
+9. ENFORCEMENT: Breach of these terms may result in:
+   - Immediate revocation of access
+   - Civil action for damages, injunctive relief, and attorney fees
+   - Criminal prosecution for unauthorized access or trade secret theft
+
+================================================================================
+COPYRIGHT & INTELLECTUAL PROPERTY RIGHTS
+================================================================================
+
+All intellectual property rights in this software are owned exclusively by
+REVERIUS OPIUM, including:
+
+  • Source code and object code
+  • Documentation and technical specifications
+  • Design patterns and architecture
+  • Algorithms and methodologies
+  • Data structures and APIs
+  • Trademarks, logos, and brand elements
+  • Trade secrets and confidential information
+
+No license, express or implied, grants any rights to these intellectual
+property assets except as expressly authorized in writing.
+
+================================================================================
+ACKNOWLEDGMENT
+================================================================================
+
+By accessing or using this software, you:
+  • Accept and agree to be bound by all terms in this document
+  • Acknowledge that REVERIUS OPIUM owns all intellectual property
+  • Understand that breach may result in legal action
+  • Accept that this software is confidential and proprietary
+  • Agree to protect this software from unauthorized access
+  • Acknowledge that you have read and understood these terms
+
+If you do not accept these terms, you must not access or use this software.
+
+================================================================================
+CONTACT
+================================================================================
+
+For licensing inquiries, authorization requests, or legal questions:
+Contact the REVERIUS OPIUM development team.
+
+================================================================================
+Version: 1.0
+Effective Date: August 16, 2026
+Last Updated: August 16, 2026
+================================================================================

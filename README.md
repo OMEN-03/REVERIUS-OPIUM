@@ -76,4 +76,17 @@ See `CONTRIBUTING.md`.
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE`.
+**PROPRIETARY SOFTWARE - ALL RIGHTS RESERVED**
+
+REVERIUS OPIUM is proprietary software owned exclusively by REVERIUS OPIUM.
+No public license is granted.
+
+**Unauthorized use, copying, modification, distribution, sublicensing, or
+creation of derivative works is strictly prohibited.**
+
+Access to this repository is restricted to explicitly authorized individuals
+only. This software is confidential and may be subject to trade secret
+protection. Unauthorized access, use, or disclosure may result in civil and
+criminal liability.
+
+For more information, see the [LICENSE](LICENSE) file and [TERMS OF USE](TERMS_OF_USE.md).
