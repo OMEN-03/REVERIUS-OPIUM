@@ -55,7 +55,7 @@ test = [
   "ruff>=0.0",
   "black>=24.3",
   "mypy>=1.9",
-  "isort>=5.12",
+  "isort>=5.10",
   "pre-commit>=4.5"
 ]
 dev = [
@@ -64,7 +64,7 @@ dev = [
   "ruff>=0.0",
   "black>=24.3",
   "mypy>=1.9",
-  "isort>=5.12",
+  "isort>=5.10",
   "pre-commit>=4.5",
   "tox>=4.8"
 ]

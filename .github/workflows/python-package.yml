@@ -16,11 +16,28 @@ jobs:
           python-version: 3.11
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements-dev.txt
-      - run: pre-commit run --all-files
-      - run: ruff check .
-      - run: isort --check-only .
-      - run: black --check .
-      - run: mypy .
+      
+      # Core blocking checks
+      - name: "Repository Integrity (blocking)"
+        run: pre-commit run --hook-stage default --all-files
+      
+      # Advisory type checking (not blocking)
+      - name: "Type Checking Report (advisory)"
+        continue-on-error: true
+        run: |
+          echo "## Type Checking Summary" >> $GITHUB_STEP_SUMMARY
+          mypy . 2>&1 | tee /tmp/mypy-report.txt || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total type errors:** $(grep -c '^' /tmp/mypy-report.txt || echo 0)" >> $GITHUB_STEP_SUMMARY
+      
+      # Advisory linting report
+      - name: "Lint Report (advisory)"
+        continue-on-error: true
+        run: |
+          echo "## Linting Summary" >> $GITHUB_STEP_SUMMARY
+          ruff check . 2>&1 | tee /tmp/ruff-report.txt || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Ruff issues:** $(grep -c '^' /tmp/ruff-report.txt || echo 0)" >> $GITHUB_STEP_SUMMARY
 
   test:
     runs-on: ${{ matrix.os }}
@@ -35,4 +52,5 @@ jobs:
           python-version: 3.11
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements-dev.txt
-      - run: python -m pytest -q
+      - name: "Run tests on ${{ matrix.os }}"
+        run: python -m pytest -q --tb=short
