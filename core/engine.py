@@ -1,6 +1,69 @@
+import logging
+import socket
+import time
 from pathlib import Path
 
+import psutil
+import requests
+
 from config.settings import SETTINGS
+
+logger = logging.getLogger(__name__)
+
+# =========================================================
+# LAZY GLOBAL BINDING
+# =========================================================
+# The Brain classes below were written assuming names like
+# terminal_print, GREEN, speak, shutdown, etc. are available as
+# module globals -- they actually live in core.reverius_opium.
+# Importing that module at the top of this file would be circular
+# (reverius_opium -> modules.command_processing -> core.engine),
+# so instead we bind the names into this module's globals() the
+# first time a command is actually routed, once reverius_opium has
+# finished loading. See TECHNICAL_DEBT_BASELINE.md / F405 errors.
+_REQUIRED_REVERIUS_NAMES = (
+    "CYAN", "GREEN", "RED", "YELLOW", "PERSONALITY_MODES",
+    "add_log", "advanced_memory", "ai_answer", "analyze_sentiment",
+    "apply_self_update", "assistant_chat", "chrome_profiles",
+    "clear_memory", "clear_terminal", "current_personality",
+    "forget_last_note", "generate_code", "get_crypto_price",
+    "get_jarvis", "get_local_ip", "get_news_headlines",
+    "get_saved_update_password", "get_update_status", "greet_user",
+    "launch", "notes", "phone_link_running", "phone_link_url",
+    "prepare_self_update", "refresh_update_status_label", "save_note",
+    "save_update_password", "set_personality_mode", "show_memory",
+    "shutdown", "speak", "start_phone_link_server",
+    "stop_phone_link_server", "summarize_memory", "tell_joke",
+    "terminal_print", "toggle_voice_mode", "update_candidate_file",
+    "update_command_history_display", "verify_password",
+    "voice_enabled", "AUTHORIZED_UPDATE_TOKEN",
+)
+
+_bound = False
+
+
+def _bind_reverius_globals() -> None:
+    """Populate this module's globals from core.reverius_opium on first use."""
+    global _bound
+    if _bound:
+        return
+    try:
+        import core.reverius_opium as _rop
+    except Exception:
+        # UI stack (customtkinter etc.) unavailable -- leave brains
+        # inert rather than crashing the whole router.
+        _bound = True
+        return
+    g = globals()
+    for name in _REQUIRED_REVERIUS_NAMES:
+        if name not in g and hasattr(_rop, name):
+            g[name] = getattr(_rop, name)
+    # get_ollama_response is referenced by CodingBrain but was never
+    # defined anywhere in the codebase -- provide a safe stub so that
+    # call site degrades instead of raising NameError.
+    if "get_ollama_response" not in g:
+        g["get_ollama_response"] = lambda *a, **k: None
+    _bound = True
 
 
 class BaseBrain:
@@ -12,34 +75,19 @@ class CoreBrain(BaseBrain):
     def handle(self, cmd):
         if cmd == "help":
             self.show_help()
-            return True
-
-        if cmd == "exit":
-            shutdown()
-            return True
-
-        if cmd == "greet":
-            greet_user()
-            return True
-
-        if cmd == "time":
-            terminal_print(time.strftime("%H:%M:%S"), GREEN)
-            return True
-
-        if cmd == "date":
-            terminal_print(time.strftime("%d-%m-%Y"), GREEN)
-            return True
-
-        if cmd == "clear":
-            clear_terminal()
-            return True
-
-        if cmd in ("show personality", "current personality"):
-            terminal_print(
-                f"Personality mode: {current_personality}",
-                CYAN
-            )
-            return True
+            try:
+                jarvis = get_jarvis()
+                if jarvis:
+                    answer = jarvis.ask(
+                        f"System: You are Reverius Advanced AI\n\nUser: {query}",
+                        temperature=0.7,
+                        max_tokens=1024
+                    )
+                    terminal_print(answer, GREEN)
+                    advanced_memory.add_interaction(query, answer, analyze_sentiment(query))
+                    return
+            except Exception:
+                pass
 
         if cmd.startswith("set personality"):
             choice = cmd.replace("set personality", "", 1).strip().upper()
@@ -1360,7 +1408,7 @@ class DownloadBrain(BaseBrain):
 
 
 class AdvancedBrain(BaseBrain):
-    """Hybrid brain using Ollama (local) + OpenAI (cloud) for maximum capability."""
+    """Advanced brain using available backends (Jarvis/OpenAI)."""
 
     def handle(self, cmd):
         if cmd.startswith("ask "):
@@ -1380,7 +1428,7 @@ class AdvancedBrain(BaseBrain):
         return False
 
     def advanced_query(self, query):
-        """Use Ollama if available, fallback to OpenAI."""
+        """Process advanced query using available backends (Jarvis/OpenAI)."""
         terminal_print(
             f"[ADVANCED] Processing: {query}",
             CYAN
@@ -1473,34 +1521,19 @@ class AutonomousBrain(BaseBrain):
                 CYAN
             )
             speak("Autonomous mode enabled")
-            return True
-
-        if cmd in ("autonomous mode off", "disable autonomous"):
-            self.autonomous_mode = False
-            terminal_print(
-                "[AUTONOMOUS] Mode OFF",
-                CYAN
-            )
-            return True
-
-        if cmd.startswith("schedule "):
-            task = cmd.replace("schedule", "", 1).strip()
-            self.schedule_task(task)
-            return True
-
-        if cmd in ("show tasks", "scheduled tasks", "what tasks"):
-            self.show_tasks()
-            return True
-
-        return False
-
-    def schedule_task(self, task):
-        """Schedule an autonomous task."""
-        self.scheduled_tasks.append({
-            "task": task,
-            "created": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "status": "pending"
-        })
+            try:
+                jarvis = get_jarvis()
+                if jarvis:
+                    answer = jarvis.ask(
+                        f"System: You are Reverius Advanced AI\n\nUser: {query}",
+                        temperature=0.7,
+                        max_tokens=1024
+                    )
+                    terminal_print(answer, GREEN)
+                    advanced_memory.add_interaction(query, answer, analyze_sentiment(query))
+                    return
+            except Exception:
+                pass
         terminal_print(
             f"[AUTONOMOUS] Task scheduled: {task}",
             GREEN
@@ -1615,15 +1648,23 @@ class OmenCore:
         ]
 
     def route(self, cmd):
+        _bind_reverius_globals()
         for brain in self.brains:
             try:
                 if brain.handle(cmd):
                     return True
             except Exception as e:
-                add_log(
-                    f"{brain.__class__.__name__} error: {e}",
-                    RED
+                logger.warning(
+                    "%s failed to handle %r: %s",
+                    brain.__class__.__name__, cmd, e
                 )
+                try:
+                    add_log(
+                        f"{brain.__class__.__name__} error: {e}",
+                        RED
+                    )
+                except Exception:
+                    pass  # add_log unavailable (e.g. headless import)
         return False
 
 

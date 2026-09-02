@@ -9,6 +9,10 @@ from collections import deque
 import os
 import sys
 import logging
+try:
+    from PIL import ImageGrab
+except Exception:
+    ImageGrab = None
 
 from utils.asset_manager import AssetManager
 from utils.api_key_store import clear_api_key, load_saved_api_key, save_api_key
@@ -37,7 +41,9 @@ os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
 # =========================================================
 logging.basicConfig(
     level=logging.INFO,
-    format='[%(asctime)s] %(levelname)s: %(message)s'
+    format='[%(asctime)s] %(levelname)s: %(message)s',
+    filename=str(Path.cwd() / "reverius_run.log"),
+    filemode="w"
 )
 logger = logging.getLogger(__name__)
 
@@ -1782,7 +1788,7 @@ class DownloadBrain(BaseBrain):
 
 
 class AdvancedBrain(BaseBrain):
-    """Hybrid brain using Ollama (local) + OpenAI (cloud) for maximum capability."""
+    """Advanced brain using available backends (Jarvis/OpenAI)."""
     
     def handle(self, cmd):
         if cmd.startswith("ask "):
@@ -1802,47 +1808,28 @@ class AdvancedBrain(BaseBrain):
         return False
     
     def advanced_query(self, query):
-        """Use Ollama if available, fallback to OpenAI."""
+        """Process advanced query using available backends (Jarvis/OpenAI)."""
         terminal_print(
             f"[ADVANCED] Processing: {query}",
             CYAN
         )
         speak("Processing advanced query")
         
-        # Try Ollama first (free, offline)
-        try:
-            ollama_response = get_ollama_response(query)
-            if ollama_response:
-                terminal_print(
-                    f"[OLLAMA LOCAL]\n{ollama_response}",
-                    GREEN
-                )
-                advanced_memory.add_interaction(query, ollama_response, analyze_sentiment(query))
-                speak(ollama_response[:200])
-                return
-        except:
-            pass
-        
-        # Use Jarvis SDK (handles Ollama or OpenAI fallback)
         try:
             jarvis = get_jarvis()
-            answer = jarvis.ask(
-                f"System: You are Reverius Advanced AI\n\nUser: {query}",
-                temperature=0.7,
-                max_tokens=1024
-            )
-            terminal_print(
-                f"[ADVANCED]\n{answer}",
-                GREEN
-            )
-            advanced_memory.add_interaction(query, answer, analyze_sentiment(query))
-            speak(answer[:200])
+            if jarvis:
+                answer = jarvis.ask(
+                    f"System: You are Reverius Advanced AI\n\nUser: {query}",
+                    temperature=0.7,
+                    max_tokens=1024
+                )
+                terminal_print(f"[ADVANCED]\n{answer}", GREEN)
+                advanced_memory.add_interaction(query, answer, analyze_sentiment(query))
+                speak(answer[:200])
+                return
         except Exception as e:
             logger.error(f"Advanced brain query failed: {e}")
-            terminal_print(
-                f"[ERROR] {e}",
-                RED
-            )
+            terminal_print(f"[ERROR] {e}", RED)
     
     def learn_info(self, info):
         """AI learns and remembers information."""
@@ -2076,6 +2063,8 @@ GREEN = CYAN
 YELLOW = CYAN
 RED = "#ff4444"
 
+from modules.system_modules import *
+
 # Theme definitions for personalities
 THEMES = {
     "DRAKEN CORE": {
@@ -2118,6 +2107,16 @@ THEMES = {
         "SECONDARY": "#6f7b8d",
         "WARNING": "#ffd98a",
     }
+}
+
+# REVERIUS THEME (gold on navy) — matches the provided HUD screenshot
+THEMES["REVERIUS"] = {
+    "BACKGROUND": "#07111d",
+    "PRIMARY": "#d4af37",
+    "ACCENT": "#f0b24b",
+    "TEXT": "#f3e7c8",
+    "SECONDARY": "#8c6328",
+    "WARNING": "#f0b24b",
 }
 
 
@@ -2184,6 +2183,24 @@ def apply_theme(mode_name: str):
 
         try:
             draw_radar()
+        except:
+            pass
+
+        # Additional layout tweaks for the REVERIUS theme
+        try:
+            if mode_name == "REVERIUS":
+                try:
+                    top = globals().get("top_title_label")
+                    if top is not None:
+                        top.configure(font=("Segoe UI", 26, "bold"))
+                except:
+                    pass
+                try:
+                    time_lbl = globals().get("top_time_label")
+                    if time_lbl is not None:
+                        time_lbl.configure(font=("Segoe UI", 12, "bold"))
+                except:
+                    pass
         except:
             pass
 
@@ -2273,7 +2290,7 @@ PERSONALITY_MODES = [
     "SENTINEL"
 ]
 
-current_personality = "OMEN SHADOW CORE"
+current_personality = "REVERIUS"
 voice_enabled = True
 loaded_plugins = []
 plugin_status_label = None
@@ -2331,7 +2348,7 @@ PERSONALITY_PROMPTS = {
 
 app = ctk.CTk()
 
-app.geometry("1700x950+0+0")
+app.geometry("1980x1080+0+0")
 app.attributes("-fullscreen", False)
 
 app.title("OMEN SHADOW CORE")
@@ -3695,80 +3712,8 @@ def get_gpu_usage():
 
 def draw_radar():
 
-    global radar_angle
-
-    if not running:
-        return
-
-    try:
-
-        radar_canvas.delete("all")
-
-        width = 260
-        height = 180
-        center_x = width / 2
-        center_y = height / 2
-        radius = 78
-
-        for ring in [radius * 0.4, radius * 0.7, radius]:
-            radar_canvas.create_oval(
-                center_x - ring,
-                center_y - ring,
-                center_x + ring,
-                center_y + ring,
-                outline="#4a8f3a"
-            )
-
-        for i in range(0, 360, 45):
-            angle = math.radians(i)
-            x = center_x + math.cos(angle) * radius
-            y = center_y + math.sin(angle) * radius
-            radar_canvas.create_line(
-                center_x,
-                center_y,
-                x,
-                y,
-                fill="#225c18"
-            )
-
-        for dot in radar_dots:
-            dot[0] += 0.01
-            if dot[0] > math.pi * 2:
-                dot[0] -= math.pi * 2
-            x = center_x + math.cos(dot[0]) * dot[1]
-            y = center_y + math.sin(dot[0]) * dot[1]
-            brightness = 180 + int(75 * math.sin(dot[0]))
-            color = f"#{brightness:02x}{220:02x}{120:02x}"
-            radar_canvas.create_oval(
-                x - dot[2],
-                y - dot[2],
-                x + dot[2],
-                y + dot[2],
-                fill=color,
-                outline=""
-            )
-
-        sweep_x = center_x + math.cos(radar_angle) * radius
-        sweep_y = center_y + math.sin(radar_angle) * radius
-
-        radar_canvas.create_line(
-            center_x,
-            center_y,
-            sweep_x,
-            sweep_y,
-            fill="#d4af37",
-            width=2
-        )
-
-        radar_angle += 0.05
-
-    except:
-        pass
-
-    safe_after(
-        90,
-        draw_radar
-    )
+    # Radar disabled — removed per user request.
+    return
 
 # =========================================================
 # SYSTEM UPDATE
@@ -4119,21 +4064,10 @@ def assistant_chat(query):
 # LAUNCH SYSTEM
 # =========================================================
 
-def launch(command):
-
-    try:
-
-        subprocess.Popen(
-            command,
-            shell=True
-        )
-
-    except:
-
-        terminal_print(
-            "[ERROR] Failed to launch",
-            RED
-        )
+# Delegate to the single guarded implementation in command_processing
+# (see _SHELL_INJECTION_CHARS there) instead of keeping a second,
+# unguarded copy in sync by hand.
+launch = command_processing_module.launch
 
 # =========================================================
 # COMMANDS
@@ -5351,12 +5285,57 @@ def start_omen():
     auto_update_check()
     update_graph()
     ai_pulse()
-    draw_cyber_globe()
-    draw_radar()
-    cursor_blink()
-    engine_heartbeat()
+    try:
+        draw_cyber_globe()
+    except Exception as e:
+        logger.warning(f"draw_cyber_globe failed: {e}")
 
-    app.mainloop()
+    try:
+        draw_radar()
+    except Exception as e:
+        logger.warning(f"draw_radar failed: {e}")
+
+    try:
+        cursor_blink()
+    except Exception as e:
+        logger.warning(f"cursor_blink failed: {e}")
+
+    try:
+        engine_heartbeat()
+    except Exception as e:
+        logger.warning(f"engine_heartbeat failed: {e}")
+
+    try:
+        logger.info("Entering app.mainloop()")
+        app.mainloop()
+    except Exception as e:
+        logger.exception(f"Mainloop exited with exception: {e}")
+    finally:
+        logger.info("App mainloop has ended")
+
+
+def _save_hud_screenshot(delay_ms: int = 1500):
+    """Schedule an after-call to capture and save the full screen to hud_screenshot.png.
+
+    Uses PIL.ImageGrab if available. This helps verify UI appearance post-startup.
+    """
+    try:
+        if ImageGrab is None:
+            return
+        def _grab():
+            try:
+                img = ImageGrab.grab()
+                out = Path.cwd() / "hud_screenshot.png"
+                img.save(out)
+                logger.info(f"Saved HUD screenshot to {out}")
+            except Exception as e:
+                logger.warning(f"Failed to save HUD screenshot: {e}")
+        try:
+            app.after(delay_ms, _grab)
+        except Exception:
+            _grab()
+    except Exception:
+        pass
 
 
 def show_start_screen():

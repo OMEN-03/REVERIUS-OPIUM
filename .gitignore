@@ -42,3 +42,12 @@ benchmark_history.json
 assets_manifest.json
 assets_report.md
 assets_report.json
+
+# Scratch / debug files that shouldn't be committed
+tmp_*.py
+*_debug.txt
+*_debug.log
+*_log.txt
+*.sqlite3
+*.backup.zip
+*_backup.zip

@@ -1,3 +1,5 @@
+import subprocess
+
 from config.settings import SETTINGS
 from modules.ai_backend import *
 from modules.memory import *
@@ -302,7 +304,21 @@ def assistant_chat(query):
 # LAUNCH SYSTEM
 # =========================================================
 
+# Characters that have no legitimate place in an "open this app" command
+# but are the standard vectors for shell command injection / chaining.
+# We can't drop shell=True entirely because Windows built-ins like
+# `start` are only available through the shell, so instead we refuse to
+# run anything containing these.
+_SHELL_INJECTION_CHARS = ("&", "|", ";", "`", "$(", ">", "<", "\n", "\r")
+
+
 def launch(command):
+    if any(token in command for token in _SHELL_INJECTION_CHARS):
+        terminal_print(
+            "[ERROR] Refused to launch: command contains disallowed characters",
+            RED
+        )
+        return
 
     try:
 
