@@ -1214,7 +1214,8 @@ class CompilerBrain(BaseBrain):
 
         try:
             compiled = compile(self.code_buffer, "<user_code>", "exec")
-            exec_globals = {}
+            # Restrict execution environment to prevent arbitrary code execution
+            exec_globals = {"__builtins__": {}}
             exec(compiled, exec_globals)
             terminal_print(
                 "[COMPILER] Code executed successfully.",
@@ -1242,7 +1243,8 @@ class CompilerBrain(BaseBrain):
 
         try:
             compiled = compile(code, "<inline_code>", "exec")
-            exec_globals = {}
+            # Restrict execution environment to prevent arbitrary code execution
+            exec_globals = {"__builtins__": {}}
             exec(compiled, exec_globals)
             terminal_print(
                 "[COMPILER] Executed.",

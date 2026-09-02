@@ -1,4 +1,4 @@
-from config.settings import SETTINGS
+﻿from config.settings import SETTINGS
 from modules.ai_backend import *
 from modules.memory import *
 
@@ -21,7 +21,7 @@ def safe_after(ms, func):
 
         return after_id
 
-    except:
+    except Exception:
         return None
 
 # =========================================================
@@ -57,7 +57,7 @@ def detect_chrome_profiles():
                         name.lower()
                     ] = name
 
-    except:
+    except Exception:
         pass
 
 
@@ -69,12 +69,12 @@ def get_local_ip():
         )
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
-    except:
+    except Exception:
         ip = "127.0.0.1"
     finally:
         try:
             s.close()
-        except:
+        except Exception:
             pass
 
     return ip
@@ -93,7 +93,7 @@ def log_self_update(message, color=CYAN):
             f.write(
                 f"{time.strftime('[%Y-%m-%d %H:%M:%S]')} {message}\n"
             )
-    except:
+    except Exception:
         pass
 
 
@@ -203,7 +203,7 @@ def apply_self_update():
         if 'backup_path' in locals() and backup_path.exists():
             try:
                 backup_path.replace(Path(__file__))
-            except:
+            except Exception:
                 pass
         terminal_print(
             f"[ERROR] Update failed: {e}",
@@ -302,7 +302,7 @@ def load_notes():
                     for line in f
                     if line.strip()
                 ]
-    except:
+    except Exception:
         pass
 
 

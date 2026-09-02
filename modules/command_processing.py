@@ -1,4 +1,4 @@
-import subprocess
+﻿import subprocess
 
 from config.settings import SETTINGS
 from modules.ai_backend import *
@@ -154,7 +154,7 @@ def ai_answer(query):
         except wikipedia.exceptions.DisambiguationError as e:
             try:
                 result = wikipedia.summary(e.options[0], sentences=2)
-            except:
+            except Exception:
                 result = None
 
         except wikipedia.exceptions.PageError:
@@ -327,8 +327,7 @@ def launch(command):
             shell=True
         )
 
-    except:
-
+    except Exception:
         terminal_print(
             "[ERROR] Failed to launch",
             RED
@@ -1277,7 +1276,7 @@ def engine_heartbeat():
             f"OMEN SHADOW CORE | CPU {cpu}%"
         )
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -1305,24 +1304,24 @@ def shutdown():
                     after_id
                 )
 
-            except:
+            except Exception:
                 pass
 
-    except:
+    except Exception:
         pass
 
     try:
 
         plt.close("all")
 
-    except:
+    except Exception:
         pass
 
     try:
 
         app.destroy()
 
-    except:
+    except Exception:
         pass
 
     sys.exit(0)
@@ -1338,3 +1337,4 @@ def _bind_window_shutdown() -> None:
 
 
 _bind_window_shutdown()
+

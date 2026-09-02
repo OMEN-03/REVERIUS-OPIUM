@@ -1,4 +1,4 @@
-from config.settings import SETTINGS
+﻿from config.settings import SETTINGS
 from modules.utilities import *
 from modules.system_modules import terminal_print, add_log
 
@@ -47,7 +47,7 @@ def voice_worker():
 
             time.sleep(0.1)
 
-        except:
+        except Exception:
             speaking_event.clear()
             pass
 
@@ -137,7 +137,7 @@ def greet_user(name=None):
         speak(message)
         wait_for_speech(None)
 
-    except:
+    except Exception:
         pass
 
 
@@ -182,5 +182,5 @@ def play_startup_sequence(name=None):
         speak(msg5)
         wait_for_speech(None)
 
-    except:
+    except Exception:
         pass

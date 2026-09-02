@@ -1,4 +1,4 @@
-# =========================================================
+﻿# =========================================================
 # REVERIUS OPIUM v2.5 (PRODUCTION-READY MERGED)
 # MULTI-AI HUD SYSTEM + OPENJARVIS BACKEND
 # =========================================================
@@ -240,7 +240,7 @@ class AdvancedMemory:
         if self.memory_file.exists():
             try:
                 return json.loads(self.memory_file.read_text())
-            except:
+            except Exception:
                 return self.default_memory()
         return self.default_memory()
     
@@ -257,7 +257,7 @@ class AdvancedMemory:
     def save_memory(self):
         try:
             self.memory_file.write_text(json.dumps(self.memory, indent=2))
-        except:
+        except Exception:
             pass
     
     def add_interaction(self, user_input, ai_response, sentiment="neutral"):
@@ -317,8 +317,8 @@ def get_weather(city="New York"):
         response = requests.get(url, timeout=5)
         data = response.json()
         current = data["current_condition"][0]
-        return f"{current['temp_C']}°C, {current['weatherDesc'][0]['value']}"
-    except:
+        return f"{current['temp_C']}Â°C, {current['weatherDesc'][0]['value']}"
+    except Exception:
         return "Weather data unavailable"
 
 
@@ -330,7 +330,7 @@ def get_crypto_price(symbol="BTC"):
         data = response.json()
         price = data.get(symbol.lower(), {}).get("usd", "N/A")
         return f"{symbol} = ${price}"
-    except:
+    except Exception:
         return f"{symbol} price unavailable"
 
 
@@ -342,7 +342,7 @@ def get_news_headlines():
         data = response.json()
         headlines = [article["title"] for article in data.get("articles", [])[:3]]
         return headlines
-    except:
+    except Exception:
         return ["News unavailable"]
 
 
@@ -1249,223 +1249,6 @@ class SecurityBrain(BaseBrain):
             )
 
 
-class SecurityBrain(BaseBrain):
-    def handle(self, cmd):
-        if cmd in ("security status", "show security status"):
-            terminal_print(
-                "[AI] Security subsystem nominal.",
-                GREEN
-            )
-            return True
-
-        if cmd in ("scan system", "security scan", "scan security", "scan files"):
-            self.scan_system()
-            return True
-
-        if cmd in ("scan devices", "discover devices", "list devices"):
-            self.scan_devices()
-            return True
-
-        if cmd.startswith("tap device "):
-            target = cmd.replace("tap device", "", 1).strip()
-            self.tap_device(target)
-            return True
-
-        if cmd.startswith("hack device "):
-            target = cmd.replace("hack device", "", 1).strip()
-            self.hack_device(target)
-            return True
-
-        return False
-
-    def scan_system(self):
-        suspicious = []
-        try:
-            for proc in psutil.process_iter(["pid", "name"]):
-                name = (proc.info.get("name") or "").lower()
-                if any(term in name for term in ("miner", "crypto", "hack", "malware", "virus", "suspicious", "cmd.exe")):
-                    suspicious.append(proc.info)
-        except Exception:
-            pass
-
-        if suspicious:
-            terminal_print(
-                "[AI] Suspicious processes detected:",
-                RED
-            )
-            for proc in suspicious:
-                terminal_print(
-                    f" - {proc.get('name')} (PID {proc.get('pid')})",
-                    YELLOW
-                )
-        else:
-            terminal_print(
-                "[AI] No suspicious processes detected.",
-                GREEN
-            )
-
-    def scan_devices(self):
-        try:
-            local_ip = get_local_ip()
-            prefix = ".".join(local_ip.split(".")[:3])
-            devices = []
-            terminal_print(
-                f"[AI] Scanning local network {prefix}.0/24 for active devices...",
-                CYAN
-            )
-            for i in range(1, 21):
-                host = f"{prefix}.{i}"
-                if host == local_ip:
-                    continue
-                if self.is_host_up(host):
-                    devices.append(host)
-                    terminal_print(f" - {host}", GREEN)
-
-            if not devices:
-                terminal_print(
-                    "[AI] No network devices found in the scanned range.",
-                    YELLOW
-                )
-        except Exception as e:
-            terminal_print(
-                f"[ERROR] Device scan failed: {e}",
-                RED
-            )
-
-    def is_host_up(self, host):
-        try:
-            addr = socket.gethostbyname(host)
-        except Exception:
-            return False
-        for port in (22, 23, 80, 443, 8080):
-            try:
-                with socket.create_connection((addr, port), timeout=0.4):
-                    return True
-            except Exception:
-                pass
-        return False
-
-    def probe_ports(self, host, ports=None):
-        if ports is None:
-            ports = (22, 23, 80, 443, 8080, 3306, 3389)
-        open_ports = []
-        try:
-            addr = socket.gethostbyname(host)
-        except Exception:
-            return open_ports
-
-        for port in ports:
-            try:
-                with socket.create_connection((addr, port), timeout=0.5):
-                    open_ports.append(port)
-            except Exception:
-                pass
-        return open_ports
-
-    def get_service_banner(self, host, port):
-        try:
-            addr = socket.gethostbyname(host)
-            with socket.create_connection((addr, port), timeout=0.8) as sock:
-                sock.settimeout(0.8)
-                data = sock.recv(1024)
-                return data.decode(errors="ignore").strip()
-        except Exception:
-            return "No banner available"
-
-    def tap_device(self, target):
-        if not target:
-            terminal_print(
-                "[AI] Specify a target device with 'tap device <target>'.",
-                YELLOW
-            )
-            return
-
-        terminal_print(
-            f"[AI] Tapping device {target}...",
-            CYAN
-        )
-        ports = self.probe_ports(target)
-        if not ports:
-            terminal_print(
-                f"[AI] No open services detected for {target}.",
-                YELLOW
-            )
-            return
-
-        terminal_print(
-            f"[AI] Open services discovered on {target}:",
-            GREEN
-        )
-        for port in ports:
-            banner = self.get_service_banner(target, port)
-            terminal_print(
-                f" - Port {port}: {banner}",
-                GREEN
-            )
-
-    def hack_device(self, target):
-        if not target:
-            terminal_print(
-                "[AI] Specify a target device with 'hack device <target>'.",
-                YELLOW
-            )
-            return
-
-        terminal_print(
-            f"[AI] Attempting to hack device {target}...",
-            CYAN
-        )
-        ports = self.probe_ports(target)
-        if not ports:
-            terminal_print(
-                f"[AI] No exposed services found on {target}. Hacking attempt aborted.",
-                YELLOW
-            )
-            return
-
-        terminal_print(
-            f"[AI] Exposed services on {target}:",
-            GREEN
-        )
-        for port in ports:
-            terminal_print(
-                f" - Port {port}",
-                GREEN
-            )
-
-        if 23 in ports:
-            terminal_print(
-                "[AI] Telnet service detected. Default credentials may be available.",
-                YELLOW
-            )
-        if 22 in ports:
-            terminal_print(
-                "[AI] SSH service detected. Weak credentials or reused keys may allow access.",
-                YELLOW
-            )
-        if 80 in ports or 443 in ports:
-            terminal_print(
-                "[AI] HTTP/HTTPS service detected. Search for admin/default login pages.",
-                YELLOW
-            )
-        if 3389 in ports:
-            terminal_print(
-                "[AI] RDP service detected. Remote desktop brute force may be possible.",
-                YELLOW
-            )
-        if 3306 in ports:
-            terminal_print(
-                "[AI] Database service detected. Default credentials are a possible weakness.",
-                YELLOW
-            )
-
-        if not any(port in ports for port in (22, 23, 80, 443, 3389, 3306)):
-            terminal_print(
-                "[AI] No standard remote entry points detected. Further reconnaissance is required.",
-                CYAN
-            )
-
-
 class ThinkingBrain(BaseBrain):
     def handle(self, cmd):
         if cmd.startswith("think "):
@@ -1680,7 +1463,7 @@ class DownloadBrain(BaseBrain):
             return
 
         terminal_print(
-            f"[DOWNLOAD] ⚠️  SECURITY WARNING: Only download from trusted sources!",
+            f"[DOWNLOAD] âš ï¸  SECURITY WARNING: Only download from trusted sources!",
             YELLOW
         )
         terminal_print(
@@ -1727,7 +1510,7 @@ class DownloadBrain(BaseBrain):
                             percent = (downloaded / total_size) * 100
                             bar_length = 30
                             filled = int(bar_length * downloaded / total_size)
-                            bar = "█" * filled + "░" * (bar_length - filled)
+                            bar = "â–ˆ" * filled + "â–‘" * (bar_length - filled)
                             terminal_print(
                                 f"[DOWNLOAD] {bar} {percent:.1f}% ({downloaded}/{total_size} bytes)",
                                 CYAN
@@ -1735,7 +1518,7 @@ class DownloadBrain(BaseBrain):
 
             file_size_mb = filepath.stat().st_size / (1024 * 1024)
             terminal_print(
-                f"[DOWNLOAD] ✓ Download complete! ({file_size_mb:.2f} MB)",
+                f"[DOWNLOAD] âœ“ Download complete! ({file_size_mb:.2f} MB)",
                 GREEN
             )
             speak(f"Download complete: {filename}")
@@ -1750,19 +1533,19 @@ class DownloadBrain(BaseBrain):
 
         except requests.exceptions.Timeout:
             terminal_print(
-                "[DOWNLOAD] ✗ Download timeout - URL may be invalid or server is slow",
+                "[DOWNLOAD] âœ— Download timeout - URL may be invalid or server is slow",
                 RED
             )
             speak("Download timeout")
         except requests.exceptions.ConnectionError:
             terminal_print(
-                "[DOWNLOAD] ✗ Connection failed - Check internet or URL",
+                "[DOWNLOAD] âœ— Connection failed - Check internet or URL",
                 RED
             )
             speak("Connection failed")
         except Exception as e:
             terminal_print(
-                f"[DOWNLOAD] ✗ Download failed: {e}",
+                f"[DOWNLOAD] âœ— Download failed: {e}",
                 RED
             )
             speak(f"Download failed: {str(e)[:30]}")
@@ -1782,7 +1565,7 @@ class DownloadBrain(BaseBrain):
         for name, info in self.active_downloads.items():
             size_mb = info["size"] / (1024 * 1024)
             terminal_print(
-                f"  • {name} ({size_mb:.2f} MB) - {info['type']} - {info['time']}",
+                f"  â€¢ {name} ({size_mb:.2f} MB) - {info['type']} - {info['time']}",
                 GREEN
             )
 
@@ -1863,7 +1646,7 @@ class AdvancedBrain(BaseBrain):
         )
         for note in advanced_memory.memory["learning_notes"][-10:]:
             terminal_print(
-                f"  • {note['content']} ({note['timestamp']})",
+                f"  â€¢ {note['content']} ({note['timestamp']})",
                 GREEN
             )
 
@@ -1933,7 +1716,7 @@ class AutonomousBrain(BaseBrain):
         )
         for task in self.scheduled_tasks:
             terminal_print(
-                f"  • {task['task']} - {task['status']} ({task['created']})",
+                f"  â€¢ {task['task']} - {task['status']} ({task['created']})",
                 GREEN
             )
 
@@ -2109,7 +1892,7 @@ THEMES = {
     }
 }
 
-# REVERIUS THEME (gold on navy) — matches the provided HUD screenshot
+# REVERIUS THEME (gold on navy) â€” matches the provided HUD screenshot
 THEMES["REVERIUS"] = {
     "BACKGROUND": "#07111d",
     "PRIMARY": "#d4af37",
@@ -2149,7 +1932,7 @@ def apply_theme(mode_name: str):
         # Try to reconfigure top-level containers and key widgets
         try:
             app.configure(fg_color=BG)
-        except:
+        except Exception:
             pass
 
         for wname in ("main_frame", "left_panel", "center_panel", "right_panel", "logo_frame", "status_card"):
@@ -2157,33 +1940,33 @@ def apply_theme(mode_name: str):
                 w = globals().get(wname)
                 if w is not None:
                     w.configure(fg_color=PANEL)
-            except:
+            except Exception:
                 pass
 
         try:
             background_canvas.configure(bg=BG)
-        except:
+        except Exception:
             pass
 
         try:
             status_ticker.configure(text_color=CYAN)
-        except:
+        except Exception:
             pass
 
         # Redraw dynamic visuals so they pick up the new colors
         try:
             draw_background()
-        except:
+        except Exception:
             pass
 
         try:
             draw_cyber_globe()
-        except:
+        except Exception:
             pass
 
         try:
             draw_radar()
-        except:
+        except Exception:
             pass
 
         # Additional layout tweaks for the REVERIUS theme
@@ -2193,15 +1976,15 @@ def apply_theme(mode_name: str):
                     top = globals().get("top_title_label")
                     if top is not None:
                         top.configure(font=("Segoe UI", 26, "bold"))
-                except:
+                except Exception:
                     pass
                 try:
                     time_lbl = globals().get("top_time_label")
                     if time_lbl is not None:
                         time_lbl.configure(font=("Segoe UI", 12, "bold"))
-                except:
+                except Exception:
                     pass
-        except:
+        except Exception:
             pass
 
     except Exception:
@@ -2533,7 +2316,7 @@ def safe_after(ms, func):
 
         return after_id
 
-    except:
+    except Exception:
         return None
 
 # =========================================================
@@ -2569,7 +2352,7 @@ def detect_chrome_profiles():
                         name.lower()
                     ] = name
 
-    except:
+    except Exception:
         pass
 
 
@@ -2581,12 +2364,12 @@ def get_local_ip():
         )
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
-    except:
+    except Exception:
         ip = "127.0.0.1"
     finally:
         try:
             s.close()
-        except:
+        except Exception:
             pass
 
     return ip
@@ -2605,7 +2388,7 @@ def log_self_update(message, color=CYAN):
             f.write(
                 f"{time.strftime('[%Y-%m-%d %H:%M:%S]')} {message}\n"
             )
-    except:
+    except Exception:
         pass
 
 
@@ -2716,7 +2499,7 @@ def apply_self_update():
         if 'backup_path' in locals() and backup_path.exists():
             try:
                 backup_path.replace(Path(__file__))
-            except:
+            except Exception:
                 pass
         terminal_print(
             f"[ERROR] Update failed: {e}",
@@ -2908,7 +2691,7 @@ def load_memory():
                     memory_entries = converted
                 elif not isinstance(memory_entries, dict):
                     memory_entries = {}
-    except:
+    except Exception:
         memory_entries = {}
 
 
@@ -2916,7 +2699,7 @@ def save_memory():
     try:
         with open(memory_file, "w", encoding="utf-8") as f:
             json.dump(memory_entries, f, indent=2)
-    except:
+    except Exception:
         pass
 
 
@@ -2960,7 +2743,7 @@ def set_personality_mode(mode):
     current_personality = mode
     try:
         apply_theme(mode)
-    except:
+    except Exception:
         pass
     try:
         set_hud_state("PROCESSING", f"Personality {mode}")
@@ -2968,16 +2751,16 @@ def set_personality_mode(mode):
         pass
     try:
         update_personality_ui(mode)
-    except:
+    except Exception:
         pass
     try:
         personality_selector.set(mode)
-    except:
+    except Exception:
         pass
     try:
         if voice_enabled:
             speak(f"{mode} activated.")
-    except:
+    except Exception:
         pass
     terminal_print(
         f"[AI] Personality set to {mode}.",
@@ -2999,11 +2782,11 @@ def update_personality_ui(mode):
         if old:
             try:
                 old.destroy()
-            except:
+            except Exception:
                 pass
             try:
                 del globals()["personality_display_frame"]
-            except:
+            except Exception:
                 pass
 
         frame = ctk.CTkFrame(
@@ -3021,10 +2804,10 @@ def update_personality_ui(mode):
         def block_bar(percent, length=20):
             try:
                 p = max(0, min(100, int(percent)))
-            except:
+            except Exception:
                 p = 0
             filled = int((p * length) / 100)
-            return "█" * filled + "░" * (length - filled) + f"  {p}%"
+            return "â–ˆ" * filled + "â–‘" * (length - filled) + f"  {p}%"
 
         if mode == "DRAKEN CORE":
             ctk.CTkLabel(frame, text="DRAKEN TACTICAL COMMAND", text_color=YELLOW, font=("Consolas", 18, "bold")).pack(anchor="w", padx=12, pady=(8, 4))
@@ -3032,7 +2815,7 @@ def update_personality_ui(mode):
             ctk.CTkLabel(frame, text="\nTHREAT LEVEL", text_color=YELLOW, font=("Consolas", 12, "bold")).pack(anchor="w", padx=12, pady=(8, 0))
             ctk.CTkLabel(frame, text=block_bar(80), text_color=RED, font=("Consolas", 14)).pack(anchor="w", padx=12, pady=(4, 8))
             ctk.CTkLabel(frame, text="MISSION CONTROL", text_color=CYAN, font=("Consolas", 12, "bold")).pack(anchor="w", padx=12)
-            ctk.CTkLabel(frame, text="• Objective Alpha\n• Objective Bravo\n• Objective Charlie", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
+            ctk.CTkLabel(frame, text="â€¢ Objective Alpha\nâ€¢ Objective Bravo\nâ€¢ Objective Charlie", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
 
         elif mode == "OMEN SHADOW CORE":
             ctk.CTkLabel(frame, text="OMEN SHADOW CORE", text_color=CYAN, font=("Consolas", 18, "bold")).pack(anchor="w", padx=12, pady=(8, 4))
@@ -3045,14 +2828,14 @@ def update_personality_ui(mode):
         elif mode == "JARVIS":
             ctk.CTkLabel(frame, text="JARVIS SYSTEMS ONLINE", text_color=YELLOW, font=("Consolas", 18, "bold")).pack(anchor="w", padx=12, pady=(8, 4))
             ctk.CTkLabel(frame, text="WEATHER", text_color=CYAN, font=("Consolas", 12, "bold")).pack(anchor="w", padx=12)
-            ctk.CTkLabel(frame, text="28°C • Clear", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
+            ctk.CTkLabel(frame, text="28Â°C â€¢ Clear", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
             ctk.CTkLabel(frame, text="TODAY'S TASKS", text_color=CYAN, font=("Consolas", 12, "bold")).pack(anchor="w", padx=12)
-            ctk.CTkLabel(frame, text="• Project Work\n• Meeting\n• Exercise", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
+            ctk.CTkLabel(frame, text="â€¢ Project Work\nâ€¢ Meeting\nâ€¢ Exercise", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
 
         elif mode == "TITAN":
             ctk.CTkLabel(frame, text="TITAN STRATEGIC CORE", text_color=YELLOW, font=("Consolas", 18, "bold")).pack(anchor="w", padx=12, pady=(8, 4))
             ctk.CTkLabel(frame, text="ACTIVE OBJECTIVES", text_color=CYAN, font=("Consolas", 12, "bold")).pack(anchor="w", padx=12)
-            ctk.CTkLabel(frame, text="• Build OMEN\n• Improve AI\n• System Expansion", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
+            ctk.CTkLabel(frame, text="â€¢ Build OMEN\nâ€¢ Improve AI\nâ€¢ System Expansion", text_color=GREEN, font=("Consolas", 12)).pack(anchor="w", padx=24, pady=(4, 8))
             ctk.CTkLabel(frame, text="RISK ANALYSIS", text_color=YELLOW, font=("Consolas", 12, "bold")).pack(anchor="w", padx=12)
             ctk.CTkLabel(frame, text="LOW", text_color=GREEN, font=("Consolas", 14)).pack(anchor="w", padx=12, pady=(4, 8))
 
@@ -3082,7 +2865,7 @@ def toggle_voice_mode():
                 else "Voice Responses: OFF"
             )
         )
-    except:
+    except Exception:
         pass
     terminal_print(
         f"[AI] Voice responses {'enabled' if voice_enabled else 'disabled'}.",
@@ -3101,7 +2884,7 @@ def update_command_history_display():
         for entry in command_history[-20:]:
             history_box.insert("end", entry + "\n")
         history_box.configure(state="disabled")
-    except:
+    except Exception:
         pass
 
 
@@ -3110,7 +2893,7 @@ def refresh_update_status_label():
         update_status_label.configure(
             text=get_update_status()
         )
-    except:
+    except Exception:
         pass
 
 
@@ -3143,7 +2926,7 @@ def load_notes():
                     for line in f
                     if line.strip()
                 ]
-    except:
+    except Exception:
         pass
 
 
@@ -3293,7 +3076,7 @@ class PhoneLinkHandler(http.server.SimpleHTTPRequestHandler):
                 phone_last_phone_activity = (
                     f"File received: {filename}"
                 )
-            except:
+            except Exception:
                 phone_last_phone_activity = (
                     f"Failed to save file: {filename}"
                 )
@@ -3353,7 +3136,7 @@ def stop_phone_link_server():
     try:
         phone_server.shutdown()
         phone_server.server_close()
-    except:
+    except Exception:
         pass
 
     phone_server = None
@@ -3382,7 +3165,7 @@ def update_phone_link_label():
             phone_link_label.configure(
                 text="PHONE LINK: inactive"
             )
-    except:
+    except Exception:
         pass
 
 
@@ -3441,7 +3224,7 @@ def voice_worker():
 
             time.sleep(0.1)
 
-        except:
+        except Exception:
             speaking_event.clear()
             pass
 
@@ -3531,7 +3314,7 @@ def greet_user(name=None):
         speak(message)
         wait_for_speech(None)
 
-    except:
+    except Exception:
         pass
 
 
@@ -3576,7 +3359,7 @@ def play_startup_sequence(name=None):
         speak(msg5)
         wait_for_speech(None)
 
-    except:
+    except Exception:
         pass
 
 # =========================================================
@@ -3647,7 +3430,7 @@ def clear_logs():
             target.configure(state="normal")
             target.delete("1.0", "end")
             target.configure(state="disabled")
-    except:
+    except Exception:
         pass
 
 
@@ -3660,7 +3443,7 @@ def clear_terminal():
             target.configure(state="normal")
             target.delete("1.0", "end")
             target.configure(state="disabled")
-    except:
+    except Exception:
         pass
 
 # =========================================================
@@ -3712,7 +3495,7 @@ def get_gpu_usage():
 
 def draw_radar():
 
-    # Radar disabled — removed per user request.
+    # Radar disabled â€” removed per user request.
     return
 
 # =========================================================
@@ -3769,9 +3552,9 @@ def update_system():
         if battery:
 
             status = (
-                "CHARGING ⚡"
+                "CHARGING âš¡"
                 if battery.power_plugged
-                else "BATTERY 🔋"
+                else "BATTERY ðŸ”‹"
             )
 
             if "battery_label" in globals() and battery_label is not None:
@@ -3788,7 +3571,7 @@ def update_system():
 
         try:
             update_phone_link_label()
-        except:
+        except Exception:
             pass
 
         if "clock_label" in globals() and clock_label is not None:
@@ -3796,7 +3579,7 @@ def update_system():
         if "date_label" in globals() and date_label is not None:
             date_label.configure(text=time.strftime("%d-%m-%Y"))
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -3842,7 +3625,7 @@ def update_graph():
 
         canvas.draw_idle()
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -3874,7 +3657,7 @@ def ai_pulse():
                 text_color=GREEN
             )
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -3913,7 +3696,7 @@ def ai_answer(query):
         except wikipedia.exceptions.DisambiguationError as e:
             try:
                 result = wikipedia.summary(e.options[0], sentences=2)
-            except:
+            except Exception:
                 result = None
 
         except wikipedia.exceptions.PageError:
@@ -4992,7 +4775,7 @@ def cursor_blink():
 
         cursor_visible = not cursor_visible
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -5019,7 +4802,7 @@ def engine_heartbeat():
             f"OMEN SHADOW CORE | CPU {cpu}%"
         )
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -5047,24 +4830,24 @@ def shutdown():
                     after_id
                 )
 
-            except:
+            except Exception:
                 pass
 
-    except:
+    except Exception:
         pass
 
     try:
 
         plt.close("all")
 
-    except:
+    except Exception:
         pass
 
     try:
 
         app.destroy()
 
-    except:
+    except Exception:
         pass
 
     sys.exit(0)
@@ -5166,12 +4949,12 @@ def start_omen():
     try:
         try:
             app.state('normal')
-        except:
+        except Exception:
             pass
         try:
             app.update_idletasks()
             app.update()
-        except:
+        except Exception:
             pass
         try:
             app.attributes("-topmost", True)
@@ -5179,60 +4962,60 @@ def start_omen():
             app.focus_force()
             # remove topmost shortly after to allow normal window behavior
             app.after(150, lambda: app.attributes("-topmost", False))
-        except:
+        except Exception:
             pass
-    except:
+    except Exception:
         pass
 
     show_api_key_prompt()
 
     terminal_print(
-        "█ OMEN SHADOW CORE ONLINE",
+        "â–ˆ OMEN SHADOW CORE ONLINE",
         CYAN
     )
 
     terminal_print(
-        "█ GPU MONITOR ACTIVE",
+        "â–ˆ GPU MONITOR ACTIVE",
         GREEN
     )
 
     terminal_print(
-        "█ VOICE ENGINE READY",
+        "â–ˆ VOICE ENGINE READY",
         GREEN
     )
 
     terminal_print(
-        "█ STABLE HUD ENGINE ACTIVE",
+        "â–ˆ STABLE HUD ENGINE ACTIVE",
         GREEN
     )
 
     terminal_print(
-        "█ CYBER GLOBE CONNECTED",
+        "â–ˆ CYBER GLOBE CONNECTED",
         YELLOW
     )
 
     terminal_print(
-        "█ CHROME PROFILE SYSTEM READY",
+        "â–ˆ CHROME PROFILE SYSTEM READY",
         GREEN
     )
 
     terminal_print(
-        "█ AI SEARCH SYSTEM READY",
+        "â–ˆ AI SEARCH SYSTEM READY",
         CYAN
     )
 
     terminal_print(
-        f"█ AI VERSION: {AI_VERSION}",
+        f"â–ˆ AI VERSION: {AI_VERSION}",
         CYAN
     )
 
     terminal_print(
-        "█ MUSIC AI SYSTEM READY",
+        "â–ˆ MUSIC AI SYSTEM READY",
         CYAN
     )
 
     terminal_print(
-        "█ Awaiting command...",
+        "â–ˆ Awaiting command...",
         GREEN
     )
 
@@ -5423,11 +5206,11 @@ def show_start_screen():
             current_personality = personality
             try:
                 apply_theme(personality)
-            except:
+            except Exception:
                 pass
             try:
                 splash.destroy()
-            except:
+            except Exception:
                 pass
             start_omen()
         return handler
@@ -5466,11 +5249,11 @@ def show_start_screen():
     def on_close():
         try:
             splash.destroy()
-        except:
+        except Exception:
             pass
         try:
             app.destroy()
-        except:
+        except Exception:
             pass
         sys.exit(0)
 
@@ -5481,7 +5264,7 @@ def show_start_screen():
 def on_start_pressed(splash):
     try:
         splash.destroy()
-    except:
+    except Exception:
         pass
     start_omen()
 
@@ -5489,11 +5272,11 @@ def on_start_pressed(splash):
 def on_cancel_pressed(splash):
     try:
         splash.destroy()
-    except:
+    except Exception:
         pass
     try:
         app.destroy()
-    except:
+    except Exception:
         pass
     sys.exit(0)
 
@@ -5501,7 +5284,9 @@ def on_cancel_pressed(splash):
 if __name__ == "__main__":
     try:
         apply_theme(current_personality)
-    except:
+    except Exception:
         pass
     # Start main UI directly (skip splash/startup window)
     start_omen()
+
+

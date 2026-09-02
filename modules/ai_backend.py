@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import logging
@@ -158,8 +158,8 @@ def get_weather(city="New York"):
         response = requests.get(url, timeout=5)
         data = response.json()
         current = data["current_condition"][0]
-        return f"{current['temp_C']}°C, {current['weatherDesc'][0]['value']}"
-    except:
+        return f"{current['temp_C']}Â°C, {current['weatherDesc'][0]['value']}"
+    except Exception:
         return "Weather data unavailable"
 
 
@@ -171,7 +171,7 @@ def get_crypto_price(symbol="BTC"):
         data = response.json()
         price = data.get(symbol.lower(), {}).get("usd", "N/A")
         return f"{symbol} = ${price}"
-    except:
+    except Exception:
         return f"{symbol} price unavailable"
 
 
@@ -183,7 +183,7 @@ def get_news_headlines():
         data = response.json()
         headlines = [article["title"] for article in data.get("articles", [])[:3]]
         return headlines
-    except:
+    except Exception:
         return ["News unavailable"]
 
 

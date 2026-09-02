@@ -1,4 +1,4 @@
-from config.settings import SETTINGS
+﻿from config.settings import SETTINGS
 from modules.utilities import *
 
 # =========================================================
@@ -205,7 +205,7 @@ def draw_cyber_globe():
 
         rotation_y += 0.03
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -250,7 +250,7 @@ def terminal_print(
 
         terminal.see("end")
 
-    except:
+    except Exception:
         pass
 
 # =========================================================
@@ -283,21 +283,21 @@ def add_log(
 
         logs_box.see("end")
 
-    except:
+    except Exception:
         pass
 
 
 def clear_logs():
     try:
         logs_box.delete("1.0", "end")
-    except:
+    except Exception:
         pass
 
 
 def clear_terminal():
     try:
         terminal.delete("1.0", "end")
-    except:
+    except Exception:
         pass
 
 # =========================================================
@@ -415,7 +415,7 @@ def draw_radar():
 
         radar_angle += 0.05
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -486,9 +486,9 @@ def update_system():
         if battery:
 
             status = (
-                "CHARGING ⚡"
+                "CHARGING âš¡"
                 if battery.power_plugged
-                else "BATTERY 🔋"
+                else "BATTERY ðŸ”‹"
             )
 
             battery_label.configure(
@@ -511,7 +511,7 @@ def update_system():
 
         try:
             update_phone_link_label()
-        except:
+        except Exception:
             pass
 
         clock_label.configure(
@@ -526,7 +526,7 @@ def update_system():
             )
         )
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -572,7 +572,7 @@ def update_graph():
 
         canvas.draw_idle()
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -604,7 +604,7 @@ def ai_pulse():
                 text_color=GREEN
             )
 
-    except:
+    except Exception:
         pass
 
     safe_after(
@@ -626,7 +626,7 @@ def update_phone_link_label():
             phone_link_label.configure(
                 text="PHONE LINK: inactive"
             )
-    except:
+    except Exception:
         pass
 
 
