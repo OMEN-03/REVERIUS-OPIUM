@@ -1445,7 +1445,8 @@ class AdvancedBrain(BaseBrain):
                 advanced_memory.add_interaction(query, ollama_response, analyze_sentiment(query))
                 speak(ollama_response[:200])
                 return
-        except:
+        except (ValueError, RuntimeError, ConnectionError) as e:
+            logger.warning("Ollama response failed: %s", e)
             pass
 
         try:
